@@ -1,5 +1,7 @@
+import PostCard from "@/components/PostCard";
 import SideBar from "@/components/SideBar";
 import { useAuthState } from "@/context/auth";
+import { Post } from "@/types";
 import axios from "axios";
 import Image from "next/image";
 import { useRouter } from "next/router";
@@ -46,6 +48,19 @@ const SubPage = () => {
       fileInput.click();
     }
   };
+
+  let renderPosts;
+  if (!sub) {
+    renderPosts = <p className="text-lg text-center">로딩중...</p>;
+  } else if (sub.posts.length === 0) {
+    renderPosts = (
+      <p className="text-lg text-center">아직 작성된 포스타가 없습니다</p>
+    );
+  } else {
+    renderPosts = sub.posts.map((post: Post) => (
+      <PostCard key={post.identifier} post={post} />
+    ));
+  }
 
   return (
     <>
@@ -103,9 +118,8 @@ const SubPage = () => {
             </div>
           </div>
           <div className="flex max-w-5xl px-4 pt-5 mx-auto">
-            <div className="w-full md:mr-3 md:w-8/12">
-              <SideBar sub={sub} />
-            </div>
+            <div className="w-full md:mr-3 md:w-8/12">{renderPosts}</div>
+            <SideBar sub={sub} />
           </div>
         </>
       )}
