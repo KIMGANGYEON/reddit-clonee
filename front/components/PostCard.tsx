@@ -1,12 +1,16 @@
+import { useAuthState } from "@/context/auth";
 import { Post } from "@/types";
+import axios from "axios";
 import dayjs from "dayjs";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/router";
 import React from "react";
 import { FaArrowDown, FaArrowUp } from "react-icons/fa";
 
 interface PostCardProps {
   post: Post;
+  subMutate?: () => void;
 }
 
 const PostCard = ({
@@ -24,13 +28,32 @@ const PostCard = ({
     username,
     sub,
   },
+  subMutate,
 }: PostCardProps) => {
+  const router = useRouter();
+  const isInSubPage = router.pathname === "/r/[sub]";
+  const { authenticated } = useAuthState();
+  const vote = async (value: Number) => {
+    if (!authenticated) router.push("/login");
+
+    if (value === userVote) {
+      value = 0;
+    }
+
+    try {
+      await axios.post("/votes", { identifier, slug, value });
+      if (subMutate) subMutate();
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <div className="flex mb-4 bg-white rounded" id={identifier}>
       <div className="flex-shrink-0 w-10 py-2 text-center rounded-l">
         <div
           className="w-6 mx-auto text-gray-400 rounded cursor-pointer hover:bg-gray-300 hover:text-red-500"
-          //   onClick={() => vote(1, comment)}
+          onClick={() => vote(1)}
         >
           {userVote === 1 ? (
             <FaArrowUp className="mx-auto text-red-500" />
@@ -41,7 +64,7 @@ const PostCard = ({
         <p className="text-xs font-bold">{voteScore}</p>
         <div
           className="w-6 mx-auto text-gray-400 rounded cursor-pointer hover:bg-gray-300 hover:text-blue-500"
-          //   onClick={() => vote(-1, comment)}
+          onClick={() => vote(-1)}
         >
           {userVote === -1 ? (
             <FaArrowDown className="mx-auto text-blue-500" />

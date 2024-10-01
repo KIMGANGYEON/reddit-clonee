@@ -15,7 +15,11 @@ const SubPage = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const subName = router.query.sub;
-  const { data: sub, error } = useSWR(subName ? `/subs/${subName}` : null);
+  const {
+    data: sub,
+    error,
+    mutate,
+  } = useSWR(subName ? `/subs/${subName}` : null);
 
   useEffect(() => {
     if (!sub) return;
@@ -58,7 +62,7 @@ const SubPage = () => {
     );
   } else {
     renderPosts = sub.posts.map((post: Post) => (
-      <PostCard key={post.identifier} post={post} />
+      <PostCard key={post.identifier} post={post} subMutate={mutate} />
     ));
   }
 
